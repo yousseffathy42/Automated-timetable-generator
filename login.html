@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Page</title>
+</head>
+<style>
+
+body {
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background: #eef1f5;
+    padding: 0;
+    margin: 0;
+}
+
+
+h2 {
+    background: #0d47a1;
+    color: white;
+    padding: 22px;
+    text-align: center;
+    margin: 0 0 35px 0;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+
+form {
+    background: white;
+    width: 60%;
+    margin: auto;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.18);
+    animation: fadeIn 0.4s ease;
+}
+
+input[type="text"] {
+    width: 95%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #f4f6f8;
+    font-size: 16px;
+    margin-top: 8px;
+    transition: 0.2s;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    background: #e8edf1;
+    box-shadow: 0 0 0 2px #1976d2;
+}
+
+
+input[type="button"] {
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: 0.25s;
+    margin-top: 15px;
+}
+
+input[type="button"]:hover {
+    background: #0d47a1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+
+table {
+    border-collapse: collapse;
+    margin: 25px auto;
+    width: 90%;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 22px rgba(0,0,0,0.18);
+    animation: fadeIn 0.4s ease;
+}
+
+th {
+    background: #1976d2;
+    color: white;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: center;
+    background: #fafbfd;
+}
+
+tr:nth-child(even) td {
+    background: #f4f6f8;
+}
+
+tr:hover td {
+    background: #e8f1ff;
+}
+
+h3 {
+    text-align: center;
+    color: #444;
+    margin-top: 35px;
+    font-size: 20px;
+    letter-spacing: 0.3px;
+}
+
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+<script>    
+function userInfo() {
+    const name = document.f.name.value;
+    const password = document.f.password.value;
+    const first_char = password.trim().toLowerCase().charAt(0);
+
+
+    const students_passwords = ["a", "b", "c"];
+    const admin_passwords = ["d", "e", "f"];
+    const instructor_passwords = ["g", "h", "i"];
+
+    let role = "";
+    if (students_passwords.includes(first_char)) role = "student";
+    else if (admin_passwords.includes(first_char)) role = "admin";
+    else if (instructor_passwords.includes(first_char)) role = "instructor";
+    else return alert("Invalid password");
+
+    localStorage.setItem("role", role);
+    localStorage.setItem("name", name);
+
+    if (role === "student") window.location.href = "student.html";
+    else if (role === "admin") window.location.href = "admin.html";
+    else if (role === "instructor")window.location.href="instructor.html";
+    else return alert("there us no such pages");
+}
+</script>
+<body>
+<h2>Login Page</h2>
+
+<form name="f" align="center">
+    Name:<br>
+    <input type="text" name="name"><br><br>
+
+    Password:<br>
+    <input type="text" name="password"><br><br>
+
+    <input type="button" value="Login" onclick="userInfo()">
+</form>
+</body>
+</html>

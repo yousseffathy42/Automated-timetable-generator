@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Page</title>
+
+<style>
+
+body {
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background: #eef1f5;
+    padding: 0;
+    margin: 0;
+}
+
+
+h2 {
+    background: #0d47a1;
+    color: white;
+    padding: 22px;
+    text-align: center;
+    margin: 0 0 35px 0;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+
+form {
+    background: white;
+    width: 60%;
+    margin: auto;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.18);
+    animation: fadeIn 0.4s ease;
+}
+
+input[type="text"] {
+    width: 95%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #f4f6f8;
+    font-size: 16px;
+    margin-top: 8px;
+    transition: 0.2s;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    background: #e8edf1;
+    box-shadow: 0 0 0 2px #1976d2;
+}
+
+
+input[type="button"] {
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: 0.25s;
+    margin-top: 15px;
+}
+
+input[type="button"]:hover {
+    background: #0d47a1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+
+table {
+    border-collapse: collapse;
+    margin: 25px auto;
+    width: 90%;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 22px rgba(0,0,0,0.18);
+    animation: fadeIn 0.4s ease;
+}
+
+th {
+    background: #1976d2;
+    color: white;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: center;
+    background: #fafbfd;
+}
+
+tr:nth-child(even) td {
+    background: #f4f6f8;
+}
+
+tr:hover td {
+    background: #e8f1ff;
+}
+
+h3 {
+    text-align: center;
+    color: #444;
+    margin-top: 35px;
+    font-size: 20px;
+    letter-spacing: 0.3px;
+}
+
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+
+<script>
+    if (localStorage.getItem("role") !== "admin") {
+    window.location.href = "login.html";
+}
+
+const periods = ["8-10","10-12","12-2","2-4"];
+const daysY1 = ["Sun","Mon","Tue"];
+const daysY2 = ["Sun","Mon","Tue"];
+const daysY3 = ["Tue","Wed","Thu"];
+
+function buildTable(subjects, teachers, yearName, daysList) {
+    let table = "<h3>" + yearName + "</h3>";
+    table += "<table><tr><th>Day</th>";
+    for(let p=0; p<periods.length; p++) table += "<th>" + periods[p] + "</th>";
+    table += "</tr>";
+
+    for(let d=0; d<daysList.length; d++){
+        table += "<tr><td>" + daysList[d] + "</td>";
+        for(let p=0; p<periods.length; p++){
+            
+                let sub = subjects[p % subjects.length];
+                let teach = teachers[p % teachers.length];
+                table += "<td>" + sub + "<br>" + teach + "</td>";
+            
+        }
+        table += "</tr>";
+    }
+    table += "</table><br>";
+    return table;
+}
+
+function saveTimetable(){
+    const rooms = document.f.rooms.value.split(",");
+    const s1 = document.f.s1.value.split(",");
+    const t1 = document.f.t1.value.split(",");
+    const s2 = document.f.s2.value.split(",");
+    const t2 = document.f.t2.value.split(",");
+    const s3 = document.f.s3.value.split(",");
+    const t3 = document.f.t3.value.split(",");
+
+    let timetableData = [];
+
+    
+    daysY1.forEach(day => {
+        for(let p=0; p<periods.length; p++){
+            timetableData.push({
+                year: 1, day: day, period: p+1,
+                subject: s1[p % s1.length],
+                teacher_id: t1[p % t1.length],
+                room: rooms[p % rooms.length]
+            });
+        }
+    });
+
+    
+    daysY2.forEach(day => {
+        for(let p=0; p<periods.length; p++){
+            timetableData.push({
+                year: 2, day: day, period: p+1,
+                subject: s2[p % s2.length],
+                teacher_id: t2[p % t2.length],
+                room: rooms[p % rooms.length]
+            });
+        }
+    });
+
+    
+    daysY3.forEach(day => {
+        for(let p=0; p<periods.length; p++){
+            timetableData.push({
+                year: 3, day: day, period: p+1,
+                subject: s3[p % s3.length],
+                teacher_id: t3[p % t3.length],
+                room: rooms[p % rooms.length]
+            });
+        }
+    });
+
+        document.getElementById("out").innerHTML = 
+        buildTable(s1, t1, "Year 1", daysY1) +
+        buildTable(s2, t2, "Year 2", daysY2) +
+        buildTable(s3, t3, "Year 3", daysY3);
+
+    
+    fetch("http://localhost:5000/add_timetable", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(timetableData)
+    })
+    .then(res => res.json())
+    .then(data => alert(data.message))
+    .catch(err => alert("Error saving timetable"));
+}
+
+function logout(){ window.location.href="login.html"; }
+</script>
+
+<script type="text/javascript">
+            function logout(){
+            window.location.href = "login.html";
+            }
+    </script>
+</head>
+<body>
+<h2>Admin Page</h2>
+<form name="f" align="center">
+    Rooms:<br>
+    <input type="text" name="rooms"><br><br>
+
+    Year 1 Subjects:<br>
+    <input type="text" name="s1"><br><br>
+    Year 1 Teachers:<br>
+    <input type="text" name="t1"><br><br>
+
+    Year 2 Subjects:<br>
+    <input type="text" name="s2"><br><br>
+    Year 2 Teachers:<br>
+    <input type="text" name="t2"><br><br>
+
+    Year 3 Subjects:<br>
+    <input type="text" name="s3"><br><br>
+    Year 3 Teachers:<br>
+    <input type="text" name="t3"><br><br>
+
+    <input type="button" value="Save Timetable" onclick="saveTimetable()">
+</form>
+<br>
+        <center>
+        <button onclick="logout()" style="padding:10px 25px;background:red;color:white;border:none;cursor:pointer;">Logout</button>
+        </center>
+<div id="out"></div>
+
+</body>
+</html>

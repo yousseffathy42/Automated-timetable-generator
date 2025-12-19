@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Page</title>
+
+<style>
+body {
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background: #eef1f5;
+    margin: 0;
+}
+
+h2 {
+    background: #0d47a1;
+    color: white;
+    padding: 22px;
+    text-align: center;
+    margin: 0 0 35px 0;
+    font-size: 28px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+form {
+    background: white;
+    width: 60%;
+    margin: auto;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.18);
+}
+
+input[type="text"] {
+    width: 95%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #f4f6f8;
+    font-size: 16px;
+}
+
+input[type="button"] {
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+table {
+    border-collapse: collapse;
+    margin: 25px auto;
+    width: 90%;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 22px rgba(0,0,0,0.18);
+}
+
+th {
+    background: #1976d2;
+    color: white;
+    padding: 14px;
+}
+
+td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+</style>
+
+<script>
+function getYearFromID(id) {
+    const lastThree = parseInt(id.slice(-3));
+
+    if (lastThree >= 1 && lastThree <= 40) return 1;
+    if (lastThree >= 41 && lastThree <= 80) return 2;
+    if (lastThree >= 81 && lastThree <= 120) return 3;
+
+    return null;
+}
+
+function getTimetable() {
+    const id = document.f.student_id.value;
+
+    if (!id) {
+        alert("Please enter student ID");
+        return;
+    }
+
+    const year = getYearFromID(id);
+    if (!year) {
+        alert("Invalid student ID");
+        return;
+    }
+
+    fetch("http://localhost:5000/student_timetable", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ year })
+    })
+    .then(res => res.json())
+    .then(showTable)
+    .catch(() => alert("Failed to fetch timetable"));
+}
+
+function showTable(data) {
+    if (data.length === 0) {
+        document.getElementById("out").innerHTML = "<h3>No timetable found</h3>";
+        return;
+    }
+
+    let html = `
+    <table>
+        <tr>
+            <th>Day</th>
+            <th>Period</th>
+            <th>Subject</th>
+            <th>Room</th>
+            <th>Teacher</th>
+        </tr>`;
+
+    data.forEach(row => {
+        html += `
+        <tr>
+            <td>${row.day}</td>
+            <td>${row.period}</td>
+            <td>${row.subject}</td>
+            <td>${row.room}</td>
+            <td>${row.teacher_id}</td>
+        </tr>`;
+    });
+
+    html += "</table>";
+    document.getElementById("out").innerHTML = html;
+}
+
+function logout() {
+    localStorage.clear();
+    window.location.href = "login.html";
+}
+</script>
+
+</head>
+
+<body>
+
+<h2>Student Page</h2>
+
+<form name="f" align="center">
+    Student Name:<br>
+    <input type="text" name="student_name"><br><br>
+
+    Student ID:<br>
+    <input type="text" name="student_id"><br><br>
+
+    <input type="button" value="View Timetable" onclick="getTimetable()">
+</form>
+
+<br>
+<center>
+<button onclick="logout()" style="padding:10px 25px;background:red;color:white;border:none;cursor:pointer;">
+    Logout
+</button>
+</center>
+
+<div id="out"></div>
+
+</body>
+</html>

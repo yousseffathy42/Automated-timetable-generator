@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Instructor Page</title>
+
+<style>
+body {
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background: #eef1f5;
+    margin: 0;
+}
+
+h2 {
+    background: #0d47a1;
+    color: white;
+    padding: 22px;
+    text-align: center;
+    margin: 0 0 35px 0;
+    font-size: 28px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+form {
+    background: white;
+    width: 60%;
+    margin: auto;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.18);
+}
+
+input[type="text"] {
+    width: 95%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #f4f6f8;
+    font-size: 16px;
+}
+
+input[type="button"] {
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+table {
+    border-collapse: collapse;
+    margin: 25px auto;
+    width: 90%;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 22px rgba(0,0,0,0.18);
+}
+
+th {
+    background: #1976d2;
+    color: white;
+    padding: 14px;
+}
+
+td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+</style>
+
+<script>
+    if (localStorage.getItem("role") !== "instructor") {
+        alert("You are not authorized!");
+        window.location.href = "login.html";
+    }
+
+    function getInstructorTimetable() {
+        const id = document.f.instructor_id.value.trim();
+
+        if (!id) {
+            alert("Please enter instructor ID");
+            return;
+        }
+
+        fetch("http://localhost:5000/staff_timetable", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id })
+        })
+        .then(res => res.json())
+        .then(data => showTable(data))
+        .catch(err => {
+            console.error(err);
+            alert("Failed to fetch timetable");
+        });
+    }
+
+    function showTable(data) {
+        if (!data || data.length === 0) {
+            document.getElementById("out").innerHTML = "<h3>No timetable found for this instructor</h3>";
+            return;
+        }
+
+        let html = `
+        <table>
+            <tr>
+                <th>Year</th>
+                <th>Day</th>
+                <th>Period</th>
+                <th>Subject</th>
+                <th>Room</th>
+            </tr>`;
+
+        data.forEach(row => {
+            html += `
+            <tr>
+                <td>${row.year}</td>
+                <td>${row.day}</td>
+                <td>${row.period}</td>
+                <td>${row.subject}</td>
+                <td>${row.room}</td>
+            </tr>`;
+        });
+
+        html += "</table>";
+        document.getElementById("out").innerHTML = html;
+    }
+
+    function logout() {
+        localStorage.removeItem("role");
+        localStorage.removeItem("name");
+        window.location.href = "login.html";
+    }
+</script>
+
+
+</head>
+
+<body>
+
+<h2>Instructor Page</h2>
+
+<form name="f" align="center">
+    
+    Instructor ID:<br>
+    <input type="text" name="instructor_id"><br><br>
+
+    <input type="button" value="View Timetable" onclick="getInstructorTimetable()">
+</form>
+
+<br>
+<center>
+<button onclick="logout()" style="padding:10px 25px;background:red;color:white;border:none;cursor:pointer;">
+    Logout
+</button>
+</center>
+
+<div id="out"></div>
+
+</body>
+</html>
